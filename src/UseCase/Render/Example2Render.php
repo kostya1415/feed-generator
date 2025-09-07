@@ -85,7 +85,7 @@ class Example2Render extends BaseRender
         try {
             return $this->templateOffer->render([
                 'id' => $offer['id'] ?? '',
-                'available' => $offer['id'] ?? '',
+                'available' => $offer['available'] ?? '',
                 // todo
             ]);
         } catch (Exception $exception) {

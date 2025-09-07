@@ -13,6 +13,19 @@ class HttpOffersRepo implements OffersRepoInterface
     {
         return [
             // todo
+            [
+                'id' => '1',
+                'level' => '1',
+                'url' => '/catalog/1/',
+                'title' => 'first',
+            ],
+            [
+                'id' => '2',
+                'level' => '2',
+                'parent_id' => '1',
+                'url' => '/catalog/2/',
+                'title' => 'second',
+            ]
         ];
     }
 
@@ -25,6 +38,14 @@ class HttpOffersRepo implements OffersRepoInterface
     {
         return [
             // todo
+            [
+                'id' => '1',
+                'available' => 'true',
+            ],
+            [
+                'id' => '2',
+                'available' => 'false',
+            ]
         ];
     }
 
@@ -33,6 +54,6 @@ class HttpOffersRepo implements OffersRepoInterface
      */
     public function getOffersTotal(): int
     {
-        return 0; // todo
+        return 2; // todo
     }
 }
