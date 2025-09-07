@@ -3,6 +3,7 @@ docker-compose.override.yml
 docker/minio/data
 /tmp
 auth.json
+.env
 
 ###> symfony/framework-bundle ###
 /.env.local
