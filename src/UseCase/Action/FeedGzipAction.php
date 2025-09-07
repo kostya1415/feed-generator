@@ -3,7 +3,6 @@
 namespace App\UseCase\Action;
 
 use App\Enum\Compression;
-use App\Enum\Extension;
 use App\Enum\FeedName;
 use App\Repo\Contract\S3RepoInterface;
 use App\UseCase\Stream\Stream;
@@ -80,7 +79,7 @@ class FeedGzipAction
      */
     private function deleteTmpFeeds(FeedName $feedName): void
     {
-        $this->s3Repo->deleteTmpFeed($feedName, Extension::Yml, Compression::Gzip);
+        $this->s3Repo->deleteTmpFeed($feedName, Compression::Gzip);
 
         if (file_exists($localTmpFeed = $this->getTmpGzipPath($feedName))) {
             unlink($localTmpFeed);
@@ -93,7 +92,7 @@ class FeedGzipAction
      */
     private function downloadFromS3AsGzip(FeedName $feedName): void
     {
-        $streamS3 = $this->s3Repo->openPublicFeedRead($feedName, Extension::Yml);
+        $streamS3 = $this->s3Repo->openPublicFeedRead($feedName);
         $streamLocalGzip = StreamGz::fromPath($this->getTmpGzipPath($feedName), 'w');
 
         while (!$streamS3->isEnd()) {
@@ -111,7 +110,7 @@ class FeedGzipAction
     private function uploadGzipToS3(FeedName $feedName): void
     {
         $streamLocalGzip = Stream::fromPath($this->getTmpGzipPath($feedName), 'r');
-        $streamS3Gzip = $this->s3Repo->openTmpFeedWrite($feedName, Extension::Yml, Compression::Gzip);
+        $streamS3Gzip = $this->s3Repo->openTmpFeedWrite($feedName, Compression::Gzip);
 
         while (!$streamLocalGzip->isEnd()) {
             $streamS3Gzip->write($streamLocalGzip->read());
@@ -127,9 +126,9 @@ class FeedGzipAction
      */
     private function replaceFeed(FeedName $feedName): void
     {
-        $this->s3Repo->deletePublicFeed($feedName, Extension::Yml, Compression::Gzip);
-        $this->s3Repo->publishTmpFeed($feedName, Extension::Yml, Compression::Gzip);
-        $this->s3Repo->deleteTmpFeed($feedName, Extension::Yml, Compression::Gzip);
+        $this->s3Repo->deletePublicFeed($feedName, Compression::Gzip);
+        $this->s3Repo->publishTmpFeed($feedName, Compression::Gzip);
+        $this->s3Repo->deleteTmpFeed($feedName, Compression::Gzip);
     }
 
     /**

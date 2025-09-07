@@ -36,7 +36,7 @@ abstract class BaseRender
     }
 
     /**
-     * @return \App\Enum\FeedName
+     * @return FeedName
      */
     public abstract static function getFeedName(): FeedName;
 

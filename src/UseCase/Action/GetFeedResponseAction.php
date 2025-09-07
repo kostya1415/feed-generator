@@ -3,7 +3,6 @@
 namespace App\UseCase\Action;
 
 use App\Enum\Compression;
-use App\Enum\Extension;
 use App\Enum\FeedName;
 use App\Repo\Contract\S3RepoInterface;
 use Psr\Log\LoggerInterface;
@@ -31,26 +30,25 @@ class GetFeedResponseAction
 
     /**
      * @param FeedName $feedName
-     * @param Extension $ext
      * @param Compression|null $compress
      * @return StreamedResponse|Response
      */
-    public function run(FeedName $feedName, Extension $ext, ?Compression $compress = null): StreamedResponse|Response
+    public function run(FeedName $feedName, ?Compression $compress = null): StreamedResponse|Response
     {
         $this->s3Repo->registerStreamWrapper();
 
-        $response = $this->getStreamedResponse($feedName, $ext, $compress);
+        $response = $this->getStreamedResponse($feedName, $compress);
 
-        if ($contentType = $this->getContentType($ext, $compress)) {
+        if ($contentType = $this->getContentType($compress)) {
             $response->headers->set('Content-Type', $contentType);
         }
 
         $response->headers->set('Content-Disposition', $response->headers->makeDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            'feed.' . $ext->value . ($compress ? ('.' . $compress->value) : '')
+            'feed.yml' . ($compress ? ('.' . $compress->value) : '')
         ));
 
-        if ($etag = $this->getFeedETag($feedName, $ext)) {
+        if ($etag = $this->getFeedETag($feedName)) {
             $response->headers->set('ETag', $etag);
             $response->isNotModified($this->requestStack->getCurrentRequest());
         }
@@ -59,40 +57,28 @@ class GetFeedResponseAction
     }
 
     /**
-     * @param Extension $ext
      * @param Compression|null $compress
-     * @return string|null
+     * @return string
      */
-    private function getContentType(Extension $ext, ?Compression $compress): ?string
+    private function getContentType(?Compression $compress): string
     {
-        $contentType = match ($compress) {
+        return match ($compress) {
             Compression::Zip => 'application/zip',
             Compression::Gzip => 'application/gzip',
-            default => null
-        };
-
-        if ($contentType) {
-            return $contentType;
-        }
-
-        return match ($ext) {
-            Extension::Csv => 'text/csv',
-            Extension::Yml => 'application/xml',
-            default => null
+            default => 'application/xml'
         };
     }
 
     /**
      * @param FeedName $feedName
-     * @param Extension $ext
      * @param Compression|null $compress
      * @return StreamedResponse
      */
-    private function getStreamedResponse(FeedName $feedName, Extension $ext, ?Compression $compress): StreamedResponse
+    private function getStreamedResponse(FeedName $feedName, ?Compression $compress): StreamedResponse
     {
-        return new StreamedResponse(function () use ($feedName, $ext, $compress) {
+        return new StreamedResponse(function () use ($feedName, $compress) {
             try {
-                $stream = $this->s3Repo->openPublicFeedRead($feedName, $ext, $compress);
+                $stream = $this->s3Repo->openPublicFeedRead($feedName, $compress);
             } catch (Throwable $e) {
                 $this->logger->error('Download feed exception: ' . $e->getMessage());
                 throw new NotFoundHttpException('FeedName not found');
@@ -112,13 +98,12 @@ class GetFeedResponseAction
 
     /**
      * @param FeedName $feedName
-     * @param Extension $ext
      * @return string|null
      */
-    private function getFeedETag(FeedName $feedName, Extension $ext): ?string
+    private function getFeedETag(FeedName $feedName): ?string
     {
         try {
-            $headers = $this->s3Repo->getPublicFeedHeaders($feedName, $ext);
+            $headers = $this->s3Repo->getPublicFeedHeaders($feedName);
         } catch (Throwable $e) {
             $this->logger->error('Can\'t get ' . $feedName->value . ' feed headers: ' . $e->getMessage());
             return null;

@@ -3,7 +3,6 @@
 namespace App\UseCase\Action;
 
 use App\Enum\Compression;
-use App\Enum\Extension;
 use App\Enum\FeedName;
 use App\Repo\Contract\S3RepoInterface;
 use App\UseCase\Stream\Stream;
@@ -55,7 +54,7 @@ class FeedZipAction
     {
         $io->info('Deleting temporary feed ' . $feedName->value . ' if it still exists');
 
-        $this->s3Repo->deleteTmpFeed($feedName, Extension::Yml, Compression::Zip);
+        $this->s3Repo->deleteTmpFeed($feedName, Compression::Zip);
 
         $io->info('Downloading ' . $feedName->value . ' feed...');
 
@@ -99,7 +98,7 @@ class FeedZipAction
      */
     private function downloadFeed(FeedName $feedName): Stream
     {
-        $streamS3 = $this->s3Repo->openPublicFeedRead($feedName, Extension::Yml);
+        $streamS3 = $this->s3Repo->openPublicFeedRead($feedName);
 
         $streamTmpLocal = Stream::tmp();
 
@@ -150,7 +149,7 @@ class FeedZipAction
      */
     private function uploadZipFeedTmp(FeedName $feedName, Stream $streamTmpLocalZip): void
     {
-        $streamS3Zip = $this->s3Repo->openTmpFeedWrite($feedName, Extension::Yml, Compression::Zip);
+        $streamS3Zip = $this->s3Repo->openTmpFeedWrite($feedName, Compression::Zip);
 
         while (!$streamTmpLocalZip->isEnd()) {
             $streamS3Zip->write($streamTmpLocalZip->read());
@@ -165,8 +164,8 @@ class FeedZipAction
      */
     private function replaceFeed(FeedName $feedName): void
     {
-        $this->s3Repo->deletePublicFeed($feedName, Extension::Yml, Compression::Zip);
-        $this->s3Repo->publishTmpFeed($feedName, Extension::Yml, Compression::Zip);
-        $this->s3Repo->deleteTmpFeed($feedName, Extension::Yml, Compression::Zip);
+        $this->s3Repo->deletePublicFeed($feedName, Compression::Zip);
+        $this->s3Repo->publishTmpFeed($feedName, Compression::Zip);
+        $this->s3Repo->deleteTmpFeed($feedName, Compression::Zip);
     }
 }

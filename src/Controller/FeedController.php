@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Enum\Compression;
-use App\Enum\Extension;
 use App\Enum\FeedName;
 use App\UseCase\Action\GetFeedResponseAction;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,24 +22,24 @@ class FeedController extends AbstractController
     #[Route(path: '/example/feed.yml', name: 'feedExample', methods: 'GET')]
     public function example(): StreamedResponse|Response
     {
-        return $this->getFeedResponse->run(feedName: FeedName::example, ext: Extension::Yml);
+        return $this->getFeedResponse->run(feedName: FeedName::example);
     }
 
     #[Route(path: '/example/feed.yml.gz', name: 'feedExampleGzip', methods: 'GET')]
     public function exampleGzip(): StreamedResponse|Response
     {
-        return $this->getFeedResponse->run(feedName: FeedName::example, ext: Extension::Yml, compress: Compression::Gzip);
+        return $this->getFeedResponse->run(feedName: FeedName::example, compress: Compression::Gzip);
     }
 
     #[Route(path: '/example2/feed.yml', name: 'feedExample2', methods: 'GET')]
     public function example2(): StreamedResponse|Response
     {
-        return $this->getFeedResponse->run(feedName: FeedName::example2, ext: Extension::Yml);
+        return $this->getFeedResponse->run(feedName: FeedName::example2);
     }
 
     #[Route(path: '/example2/feed.yml.zip', name: 'feedExample2Zip', methods: 'GET')]
     public function example2Zip(): StreamedResponse|Response
     {
-        return $this->getFeedResponse->run(feedName: FeedName::example2, ext: Extension::Yml, compress: Compression::Zip);
+        return $this->getFeedResponse->run(feedName: FeedName::example2, compress: Compression::Zip);
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Repo;
 
 use App\Enum\Compression;
-use App\Enum\Extension;
 use App\Enum\FeedName;
 use App\Repo\Contract\S3RepoInterface;
 use App\UseCase\Stream\Stream;
@@ -59,126 +58,116 @@ class MinioS3Repo implements S3RepoInterface
 
     /**
      * @param FeedName $feedName
-     * @param Extension $ext
-     * @param \App\Enum\Compression|null $compress
+     * @param Compression|null $compress
      * @return Stream
      */
-    public function openTmpFeedWrite(FeedName $feedName, Extension $ext, ?Compression $compress = null): Stream
+    public function openTmpFeedWrite(FeedName $feedName, ?Compression $compress = null): Stream
     {
-        return Stream::fromPath($this->getTmpFeedPath($feedName, $ext, $compress), 'w');
+        return Stream::fromPath($this->getTmpFeedPath($feedName, $compress), 'w');
     }
 
     /**
      * @param FeedName $feedName
-     * @param Extension $ext
-     * @param \App\Enum\Compression|null $compress
+     * @param Compression|null $compress
      * @return Stream
      */
-    public function openPublicFeedRead(FeedName $feedName, Extension $ext, ?Compression $compress = null): Stream
+    public function openPublicFeedRead(FeedName $feedName, ?Compression $compress = null): Stream
     {
-        return Stream::fromPath($this->getPublicFeedPath($feedName, $ext, $compress), 'r');
+        return Stream::fromPath($this->getPublicFeedPath($feedName, $compress), 'r');
     }
 
     /**
      * @param FeedName $feedName
-     * @param Extension $ext
      * @param Compression|null $compress
      * @return Result
      */
-    public function deleteTmpFeed(FeedName $feedName, Extension $ext, ?Compression $compress = null): Result
+    public function deleteTmpFeed(FeedName $feedName, ?Compression $compress = null): Result
     {
         return $this->client->deleteObject([
             'Bucket' => $this->basketName,
-            'Key' => $this->getTmpFeedKey($feedName, $ext, $compress),
+            'Key' => $this->getTmpFeedKey($feedName, $compress),
         ]);
     }
 
     /**
      * @param FeedName $feedName
-     * @param Extension $ext
-     * @param \App\Enum\Compression|null $compress
+     * @param Compression|null $compress
      * @return Result
      */
-    public function deletePublicFeed(FeedName $feedName, Extension $ext, ?Compression $compress = null): Result
+    public function deletePublicFeed(FeedName $feedName, ?Compression $compress = null): Result
     {
         return $this->client->deleteObject([
             'Bucket' => $this->basketName,
-            'Key' => $this->getPublicFeedKey($feedName, $ext, $compress),
+            'Key' => $this->getPublicFeedKey($feedName, $compress),
         ]);
     }
 
     /**
      * @param FeedName $feedName
-     * @param Extension $ext
-     * @param \App\Enum\Compression|null $compress
+     * @param Compression|null $compress
      * @return Result
      */
-    public function publishTmpFeed(FeedName $feedName, Extension $ext, ?Compression $compress = null): Result
+    public function publishTmpFeed(FeedName $feedName, ?Compression $compress = null): Result
     {
         return $this->client->copyObject([
             'Bucket' => $this->basketName,
-            'Key' => $this->getPublicFeedKey($feedName, $ext, $compress),
-            'CopySource' => $this->basketName . '/' . $this->getTmpFeedKey($feedName, $ext, $compress),
+            'Key' => $this->getPublicFeedKey($feedName, $compress),
+            'CopySource' => $this->basketName . '/' . $this->getTmpFeedKey($feedName, $compress),
         ]);
     }
 
     /**
      * @param FeedName $feedName
-     * @param Extension $ext
-     * @param \App\Enum\Compression|null $compress
+     * @param Compression|null $compress
      * @return Result
      */
-    public function getPublicFeedHeaders(FeedName $feedName, Extension $ext, ?Compression $compress = null): Result
+    public function getPublicFeedHeaders(FeedName $feedName, ?Compression $compress = null): Result
     {
         return $this->client->headObject([
             'Bucket' => $this->basketName,
-            'Key' => $this->getPublicFeedKey($feedName, $ext, $compress),
+            'Key' => $this->getPublicFeedKey($feedName, $compress),
         ]);
     }
 
     /**
      * @param FeedName $feedName
-     * @param Extension $ext
-     * @param \App\Enum\Compression|null $compress
-     * @return string
-     */
-    private function getTmpFeedPath(FeedName $feedName, Extension $ext, ?Compression $compress = null): string
-    {
-        return $this->getS3Path() . '/' . $this->getTmpFeedKey($feedName, $ext, $compress);
-    }
-
-    /**
-     * @param FeedName $feedName
-     * @param Extension $ext
-     * @param \App\Enum\Compression|null $compress
-     * @return string
-     */
-    private function getPublicFeedPath(FeedName $feedName, Extension $ext, ?Compression $compress = null): string
-    {
-        return $this->getS3Path() . '/' . $this->getPublicFeedKey($feedName, $ext, $compress);
-    }
-
-
-    /**
-     * @param FeedName $feedName
-     * @param Extension $ext
      * @param Compression|null $compress
      * @return string
      */
-    private function getTmpFeedKey(FeedName $feedName, Extension $ext, ?Compression $compress = null): string
+    private function getTmpFeedPath(FeedName $feedName, ?Compression $compress = null): string
     {
-        return 'new_feed_' . $feedName->value . '_.' . $ext->value . ($compress ? ('.' . $compress->value) : '');
+        return $this->getS3Path() . '/' . $this->getTmpFeedKey($feedName, $compress);
     }
 
     /**
      * @param FeedName $feedName
-     * @param Extension $ext
      * @param Compression|null $compress
      * @return string
      */
-    private function getPublicFeedKey(FeedName $feedName, Extension $ext, ?Compression $compress = null): string
+    private function getPublicFeedPath(FeedName $feedName, ?Compression $compress = null): string
     {
-        return 'feed_' . $feedName->value . '_.' . $ext->value . ($compress ? ('.' . $compress->value) : '');
+        return $this->getS3Path() . '/' . $this->getPublicFeedKey($feedName, $compress);
+    }
+
+
+    /**
+     * @param FeedName $feedName
+     * @param Compression|null $compress
+     * @return string
+     */
+    private function getTmpFeedKey(FeedName $feedName, ?Compression $compress = null): string
+    {
+        return 'new_feed_' . $feedName->value . '_.yml' . ($compress ? ('.' . $compress->value) : '');
+    }
+
+    /**
+     * @param FeedName $feedName
+     * @param Compression|null $compress
+     * @return string
+     */
+    private function getPublicFeedKey(FeedName $feedName, ?Compression $compress = null): string
+    {
+        return 'feed_' . $feedName->value . '_.yml' . ($compress ? ('.' . $compress->value) : '');
     }
 
     /**

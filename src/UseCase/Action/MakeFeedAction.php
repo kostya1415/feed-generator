@@ -2,7 +2,6 @@
 
 namespace App\UseCase\Action;
 
-use App\Enum\Extension;
 use App\Enum\FeedName;
 use App\Repo\Contract\OffersRepoInterface;
 use App\Repo\Contract\S3RepoInterface;
@@ -127,7 +126,7 @@ class MakeFeedAction
     private function addFeedData(BaseRender $render): void
     {
         $this->feedsData[] = new FeedRenderData(
-            stream: $this->s3Repo->openTmpFeedWrite($render::getFeedName(), Extension::Yml),
+            stream: $this->s3Repo->openTmpFeedWrite($render::getFeedName()),
             render: $render
         );
     }
@@ -150,7 +149,7 @@ class MakeFeedAction
     private function deleteTmpFeeds(): void
     {
         foreach (FeedName::cases() as $feedName) {
-            $this->s3Repo->deleteTmpFeed($feedName, Extension::Yml);
+            $this->s3Repo->deleteTmpFeed($feedName);
         }
     }
 
@@ -272,9 +271,9 @@ class MakeFeedAction
     private function replaceFeeds(): void
     {
         foreach ($this->getFeedData() as $feedData) {
-            $this->s3Repo->deletePublicFeed($feedData->getRender()::getFeedName(), Extension::Yml);
-            $this->s3Repo->publishTmpFeed($feedData->getRender()::getFeedName(), Extension::Yml);
-            $this->s3Repo->deleteTmpFeed($feedData->getRender()::getFeedName(), Extension::Yml);
+            $this->s3Repo->deletePublicFeed($feedData->getRender()::getFeedName());
+            $this->s3Repo->publishTmpFeed($feedData->getRender()::getFeedName());
+            $this->s3Repo->deleteTmpFeed($feedData->getRender()::getFeedName());
         }
     }
 }
