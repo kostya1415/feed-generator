@@ -29,7 +29,7 @@ services:
           key: '%env(CEPH_ACCESS_KEY)%'
           secret: '%env(CEPH_SECRET_KEY)%'
 
-  App\Repo\S3Repo:
+  App\Repo\MinioS3Repo:
     arguments:
       $isBucketPolicySupported: '%env(bool:S3_IS_BUCKET_POLICY_SUPPORTED)%'
       $basketName: '%env(BASKET_NAME)%'
