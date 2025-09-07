@@ -1,0 +1,60 @@
+version: "3.3"
+
+services:
+
+  php-fpm:
+    build:
+      context: ./docker/php
+    environment:
+      TZ: Europe/Moscow
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./:/var/www/
+    working_dir: /var/www/
+    networks:
+      - feed-generator
+
+  nginx:
+    image: nginx:1.15
+    environment:
+      - TZ=Europe/Moscow
+    ports:
+      - "8083:80"
+    volumes:
+      - ./:/var/www/
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - php-fpm
+    networks:
+      - feed-generator
+
+  redis:
+    hostname: redis
+    image: redis:alpine
+    ports:
+      - "6381:${REDIS_PORT}"
+    volumes:
+      - ./docker/redis:/var/lib/redis
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    networks:
+      - feed-generator
+
+  minio:
+    image: minio/minio
+    restart: unless-stopped
+    ports:
+      - '9090:9000'
+    volumes:
+      - ./docker/minio/data:/data
+    environment:
+      - 'MINIO_ROOT_USER=${MINIO_ROOT_USER}'
+      - 'MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}'
+    command: server /data
+    networks:
+      - feed-generator
+
+networks:
+  feed-generator:
+    external: true

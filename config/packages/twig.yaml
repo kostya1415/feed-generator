@@ -1,0 +1,8 @@
+twig:
+    default_path: '%kernel.project_dir%/templates'
+
+when@test:
+    twig:
+        strict_variables: true
+
+        # Throws an exception if variables in the template do not exist

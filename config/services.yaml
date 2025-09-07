@@ -1,0 +1,59 @@
+parameters:
+  app.env: '%env(APP_ENV)%'
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    bind:
+      $env: '%app.env%'
+
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/DependencyInjection/'
+      - '../src/Entity/'
+      - '../src/Kernel.php'
+
+  Aws\S3\S3Client:
+    arguments:
+      - version: 'latest'
+        region: 'me-south-1'
+        endpoint: '%env(MINIO_SERVER)%'
+        use_path_style_endpoint: true
+        credentials:
+          key: '%env(CEPH_ACCESS_KEY)%'
+          secret: '%env(CEPH_SECRET_KEY)%'
+
+  App\Repo\S3Repo:
+    arguments:
+      $isBucketPolicySupported: '%env(bool:S3_IS_BUCKET_POLICY_SUPPORTED)%'
+      $basketName: '%env(BASKET_NAME)%'
+
+  App\UseCase\Action\FeedGzipAction:
+    arguments:
+      $feedNamesStr:
+        - 'example'
+        # todo
+
+  App\UseCase\Action\FeedZipAction:
+    arguments:
+      $feedNamesStr:
+        - 'example2'
+        # todo
+
+  App\UseCase\Render\ExampleRender:
+    arguments:
+      $siteUrl:
+        '%env(SITE_URL)%'
+  App\UseCase\Render\Example2Render:
+    arguments:
+      $siteUrl:
+        '%env(SITE_URL)%'
+
+  App\UseCase\Action\MakeFeedAction:
+    arguments:
+      $siteUrl: '%env(SITE_URL)%'
+      $offerLimit: '%env(int:OFFERS_PER_PAGE_LIMIT)%'
+
+  GuzzleHttp\Client:
