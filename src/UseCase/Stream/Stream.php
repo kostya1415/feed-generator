@@ -30,7 +30,8 @@ class Stream
     /**
      * @return self
      */
-    public static function tmp(): self {
+    public static function tmp(): self
+    {
         return new self(tmpfile(), true);
     }
 

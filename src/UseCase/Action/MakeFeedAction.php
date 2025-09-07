@@ -6,7 +6,7 @@ use App\Enum\FeedName;
 use App\Repo\Contract\OffersRepoInterface;
 use App\Repo\Contract\S3RepoInterface;
 use App\UseCase\DTO\FeedRenderData;
-use App\UseCase\Render\BaseRender;
+use App\UseCase\Render\Contract\RenderInterface;
 use App\UseCase\Render\RenderFabric;
 use Exception;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -120,10 +120,10 @@ class MakeFeedAction
     }
 
     /**
-     * @param BaseRender $render
+     * @param RenderInterface $render
      * @return void
      */
-    private function addFeedData(BaseRender $render): void
+    private function addFeedData(RenderInterface $render): void
     {
         $this->feedsData[] = new FeedRenderData(
             stream: $this->s3Repo->openTmpFeedWrite($render::getFeedName()),

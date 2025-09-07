@@ -3,11 +3,12 @@
 namespace App\UseCase\Render;
 
 use App\Enum\FeedName;
+use App\UseCase\Render\Contract\RenderInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Twig\Environment;
 use Twig\TemplateWrapper;
 
-abstract class BaseRender
+abstract class BaseRender implements RenderInterface
 {
     /**
      * @var TemplateWrapper
@@ -36,11 +37,6 @@ abstract class BaseRender
     }
 
     /**
-     * @return FeedName
-     */
-    public abstract static function getFeedName(): FeedName;
-
-    /**
      * @param Environment $twig
      * @return TemplateWrapper
      */
@@ -57,24 +53,4 @@ abstract class BaseRender
      * @return TemplateWrapper
      */
     protected abstract function getOfferTemplate(Environment $twig): TemplateWrapper;
-
-    /**
-     * @param SymfonyStyle $io
-     * @return string
-     */
-    public abstract function renderHeader(SymfonyStyle $io): string;
-
-    /**
-     * @param array<mixed> $category
-     * @param SymfonyStyle $io
-     * @return string
-     */
-    public abstract function renderCategory(array $category, SymfonyStyle $io): string;
-
-    /**
-     * @param array<mixed> $offer
-     * @param SymfonyStyle $io
-     * @return string
-     */
-    public abstract function renderOffer(array $offer, SymfonyStyle $io): string;
 }

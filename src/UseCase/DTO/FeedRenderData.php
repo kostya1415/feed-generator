@@ -2,18 +2,18 @@
 
 namespace App\UseCase\DTO;
 
-use App\UseCase\Render\BaseRender;
+use App\UseCase\Render\Contract\RenderInterface;
 use App\UseCase\Stream\Stream;
 
 class FeedRenderData
 {
     /**
      * @param Stream $stream
-     * @param BaseRender $render
+     * @param RenderInterface $render
      */
     public function __construct(
-        private Stream $stream,
-        private BaseRender $render
+        private Stream          $stream,
+        private RenderInterface $render
     )
     {
     }
@@ -27,9 +27,9 @@ class FeedRenderData
     }
 
     /**
-     * @return BaseRender
+     * @return RenderInterface
      */
-    public function getRender(): BaseRender
+    public function getRender(): RenderInterface
     {
         return $this->render;
     }

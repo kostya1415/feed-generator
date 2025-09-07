@@ -6,9 +6,9 @@
 
 ## TODO
 
-1. Реализовать `App\Repo\Contract\OffersRepoInterface` и `App\Repo\Contract\S3RepoInterface`. (`S3RepoInterface` для
+1. Реализовать интерфейсы `App\Repo\Contract\OffersRepoInterface` и `App\Repo\Contract\S3RepoInterface`. (`S3RepoInterface` для
    Minio уже реализован в `App\Repo\MinioS3Repo`)
-2. Создать Render классы для своих фидов по примеру `App\UseCase\Render\ExampleRender`
+2. Реализовать интерфейсы `App\UseCase\Render\Contract\RenderInterface` для своих фидов по примеру `App\UseCase\Render\ExampleRender`
 3. Заполнить .env файл
 
 ## Место хранения фидов
