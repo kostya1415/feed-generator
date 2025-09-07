@@ -2,7 +2,9 @@
 
 namespace App\Repo;
 
-class OffersRepo
+use App\Repo\Contract\OffersRepoInterface;
+
+class HttpOffersRepo implements OffersRepoInterface
 {
     /**
      * @return array<mixed>

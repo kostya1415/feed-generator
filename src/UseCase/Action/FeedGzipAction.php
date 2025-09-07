@@ -5,7 +5,7 @@ namespace App\UseCase\Action;
 use App\Enum\Compression;
 use App\Enum\Extension;
 use App\Enum\FeedName;
-use App\Repo\S3Repo;
+use App\Repo\Contract\S3RepoInterface;
 use App\UseCase\Stream\Stream;
 use App\UseCase\Stream\StreamGz;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -18,12 +18,12 @@ class FeedGzipAction
     private array $feedNames = [];
 
     /**
-     * @param S3Repo $s3Repo
+     * @param S3RepoInterface $s3Repo
      * @param array<string> $feedNamesStr
      */
     public function __construct(
-        private S3Repo $s3Repo,
-        array          $feedNamesStr
+        private S3RepoInterface $s3Repo,
+        array                   $feedNamesStr
     )
     {
         foreach ($feedNamesStr as $feedNameStr) {

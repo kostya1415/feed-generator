@@ -3,7 +3,7 @@
 namespace App\UseCase\Render;
 
 use App\Enum\FeedName;
-use App\Repo\OffersRepo;
+use App\Repo\Contract\OffersRepoInterface;
 use Exception;
 use Twig\Environment;
 
@@ -18,15 +18,15 @@ class RenderFabric
     /**
      * @param FeedName $feedName
      * @param Environment $twig
-     * @param OffersRepo $offersRepo
+     * @param OffersRepoInterface $offersRepo
      * @param string $siteUrl
      * @return BaseRender
      */
     public static function getRender(
-        FeedName    $feedName,
-        Environment $twig,
-        OffersRepo  $offersRepo,
-        string      $siteUrl
+        FeedName            $feedName,
+        Environment         $twig,
+        OffersRepoInterface $offersRepo,
+        string              $siteUrl
     ): BaseRender
     {
         foreach (self::RENDERS as $renderClass) {

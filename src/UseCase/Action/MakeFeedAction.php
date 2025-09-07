@@ -4,8 +4,8 @@ namespace App\UseCase\Action;
 
 use App\Enum\Extension;
 use App\Enum\FeedName;
-use App\Repo\OffersRepo;
-use App\Repo\S3Repo;
+use App\Repo\Contract\OffersRepoInterface;
+use App\Repo\Contract\S3RepoInterface;
 use App\UseCase\DTO\FeedRenderData;
 use App\UseCase\Render\BaseRender;
 use App\UseCase\Render\RenderFabric;
@@ -22,22 +22,22 @@ class MakeFeedAction
     private array $feedsData = [];
 
     /**
-     * @param OffersRepo $offersRepo
+     * @param OffersRepoInterface $offersRepo
      * @param Environment $twig
      * @param FeedZipAction $feedZip
      * @param FeedGzipAction $feedGzip
-     * @param S3Repo $s3Repo
+     * @param S3RepoInterface $s3Repo
      * @param int $offerLimit
      * @param string $siteUrl
      */
     public function __construct(
-        private OffersRepo     $offersRepo,
-        private Environment    $twig,
-        private FeedZipAction  $feedZip,
-        private FeedGzipAction $feedGzip,
-        private S3Repo         $s3Repo,
-        private int            $offerLimit,
-        private string         $siteUrl,
+        private OffersRepoInterface $offersRepo,
+        private Environment         $twig,
+        private FeedZipAction       $feedZip,
+        private FeedGzipAction      $feedGzip,
+        private S3RepoInterface     $s3Repo,
+        private int                 $offerLimit,
+        private string              $siteUrl,
     )
     {
     }

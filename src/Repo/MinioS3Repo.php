@@ -5,11 +5,12 @@ namespace App\Repo;
 use App\Enum\Compression;
 use App\Enum\Extension;
 use App\Enum\FeedName;
+use App\Repo\Contract\S3RepoInterface;
 use App\UseCase\Stream\Stream;
 use Aws\Result;
 use Aws\S3\S3Client;
 
-class S3Repo
+class MinioS3Repo implements S3RepoInterface
 {
     /**
      * @param S3Client $client

@@ -5,7 +5,7 @@ namespace App\UseCase\Action;
 use App\Enum\Compression;
 use App\Enum\Extension;
 use App\Enum\FeedName;
-use App\Repo\S3Repo;
+use App\Repo\Contract\S3RepoInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,12 +18,12 @@ class GetFeedResponseAction
 {
     /**
      * @param RequestStack $requestStack
-     * @param S3Repo $s3Repo
+     * @param S3RepoInterface $s3Repo
      * @param LoggerInterface $logger
      */
     public function __construct(
         private RequestStack    $requestStack,
-        private S3Repo          $s3Repo,
+        private S3RepoInterface $s3Repo,
         private LoggerInterface $logger
     )
     {
@@ -90,7 +90,7 @@ class GetFeedResponseAction
      */
     private function getStreamedResponse(FeedName $feedName, Extension $ext, ?Compression $compress): StreamedResponse
     {
-        return new StreamedResponse(function() use($feedName, $ext, $compress) {
+        return new StreamedResponse(function () use ($feedName, $ext, $compress) {
             try {
                 $stream = $this->s3Repo->openPublicFeedRead($feedName, $ext, $compress);
             } catch (Throwable $e) {
@@ -115,7 +115,8 @@ class GetFeedResponseAction
      * @param Extension $ext
      * @return string|null
      */
-    private function getFeedETag(FeedName $feedName, Extension $ext): ?string {
+    private function getFeedETag(FeedName $feedName, Extension $ext): ?string
+    {
         try {
             $headers = $this->s3Repo->getPublicFeedHeaders($feedName, $ext);
         } catch (Throwable $e) {

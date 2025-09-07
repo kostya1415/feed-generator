@@ -5,7 +5,7 @@ namespace App\UseCase\Action;
 use App\Enum\Compression;
 use App\Enum\Extension;
 use App\Enum\FeedName;
-use App\Repo\S3Repo;
+use App\Repo\Contract\S3RepoInterface;
 use App\UseCase\Stream\Stream;
 use Exception;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -20,12 +20,12 @@ class FeedZipAction
     private array $feedNames = [];
 
     /**
-     * @param S3Repo $s3Repo
+     * @param S3RepoInterface $s3Repo
      * @param array<string> $feedNamesStr
      */
     public function __construct(
-        private S3Repo $s3Repo,
-        array          $feedNamesStr
+        private S3RepoInterface $s3Repo,
+        array                   $feedNamesStr
     )
     {
         foreach ($feedNamesStr as $feedNameStr) {
@@ -132,7 +132,7 @@ class FeedZipAction
             throw new Exception('Can\'t open zip file');
         }
 
-        if (!$zip->addFile($streamTmpLocal->getFilePath(),'/feed.yml')) {
+        if (!$zip->addFile($streamTmpLocal->getFilePath(), '/feed.yml')) {
             throw new Exception('Can\'t add zip file');
         }
 

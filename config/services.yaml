@@ -15,6 +15,10 @@ services:
       - '../src/Entity/'
       - '../src/Kernel.php'
 
+  App\Repo\Contract\OffersRepoInterface: '@App\Repo\HttpOffersRepo'
+
+  App\Repo\Contract\S3RepoInterface: '@App\Repo\MinioS3Repo'
+
   Aws\S3\S3Client:
     arguments:
       - version: 'latest'
