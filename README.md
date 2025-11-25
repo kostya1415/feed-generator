@@ -8,7 +8,7 @@
 
 1. Реализовать интерфейсы `App\Repo\Contract\OffersRepoInterface` и `App\Repo\Contract\S3RepoInterface`. (`S3RepoInterface` для
    Minio уже реализован в `App\Repo\MinioS3Repo`)
-2. Реализовать интерфейсы `App\UseCase\Render\Contract\RenderInterface` для своих фидов по примеру `App\UseCase\Render\ExampleRender`
+2. Реализовать интерфейсы `App\Render\Contract\RenderInterface` для своих фидов по примеру `App\Render\ExampleRender`
 3. Создать `.env` файл из `.env.example`
 
 ## Место хранения фидов
@@ -66,7 +66,7 @@ php bin/console app:feed-zip
 6. Подменяем старый публичный сжатый фид в S3 на только что загруженный временный фид
 7. Удаляем временный фид в S3
 
-Имена фидов для сжатия нужно прописать в файле `config/services.yaml` в параметре `App\UseCase\Action\FeedGzipAction.arguments.$feedNamesStr`.
+Имена фидов для сжатия нужно прописать в файле `config/services.yaml` в параметре `App\Action\FeedGzipAction.arguments.$feedNamesStr`.
 Имя фида должно быть взято из `App\Enum\FeedName`.
 
 ### 3. Сжатие товарных фидов в gzip
@@ -87,7 +87,7 @@ php bin/console app:feed-gzip
 4. Подменяем старый сжатый фид в S3 на только что загруженный временный файл
 5. Удаляем временный файл в S3
 
-Имена фидов для сжатия нужно прописать в файле `config/services.yaml` в параметре `App\UseCase\Action\FeedZipAction.arguments.$feedNamesStr`.
+Имена фидов для сжатия нужно прописать в файле `config/services.yaml` в параметре `App\Action\FeedZipAction.arguments.$feedNamesStr`.
 Имя фида должно быть взято из `App\Enum\FeedName`.
 
 ## Роуты для загрузки фидов

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\UseCase\DTO;
+namespace App\DTO;
 
-use App\UseCase\Render\Contract\RenderInterface;
-use App\UseCase\Stream\Stream;
+use App\Render\Contract\RenderInterface;
+use App\Stream\Stream;
 
 class FeedRenderData
 {
@@ -12,8 +12,8 @@ class FeedRenderData
      * @param RenderInterface $render
      */
     public function __construct(
-        private Stream          $stream,
-        private RenderInterface $render
+        private readonly Stream          $stream,
+        private readonly RenderInterface $render
     )
     {
     }

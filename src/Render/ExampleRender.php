@@ -1,6 +1,6 @@
 <?php
 
-namespace App\UseCase\Render;
+namespace App\Render;
 
 use App\Enum\FeedName;
 use Exception;
@@ -21,6 +21,7 @@ class ExampleRender extends BaseRender
     /**
      * @param Environment $twig
      * @return TemplateWrapper
+     * @throws Exception
      */
     protected function getHeaderTemplate(Environment $twig): TemplateWrapper
     {
@@ -30,6 +31,7 @@ class ExampleRender extends BaseRender
     /**
      * @param Environment $twig
      * @return TemplateWrapper
+     * @throws Exception
      */
     protected function getCategoryTemplate(Environment $twig): TemplateWrapper
     {
@@ -39,6 +41,7 @@ class ExampleRender extends BaseRender
     /**
      * @param Environment $twig
      * @return TemplateWrapper
+     * @throws Exception
      */
     protected function getOfferTemplate(Environment $twig): TemplateWrapper
     {
@@ -68,8 +71,8 @@ class ExampleRender extends BaseRender
         return $this->templateCategory->render([
             'id' => $category['id'] ?? '',
             'level' => $category['level'] ?? '',
-            'parent_id' => $category['parent']['id'] ?? '',
-            'url' => '/catalog/' . ($category['slug'] ?? '') . '/',
+            'parent_id' => $category['parent_id'] ?? '',
+            'url' => $category['url'],
             'title' => $category['title'] ?? '',
             // todo
         ]);

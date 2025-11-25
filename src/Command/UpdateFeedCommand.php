@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\UseCase\Action\MakeFeedAction;
+use App\Action\MakeFeedAction;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,9 +23,9 @@ class UpdateFeedCommand extends Command
      * @param string|null $name
      */
     public function __construct(
-        private LockFactory    $lockFactory,
-        private MakeFeedAction $makeFeed,
-        string                 $name = null
+        private readonly LockFactory    $lockFactory,
+        private readonly MakeFeedAction $makeFeed,
+        string                          $name = null
     )
     {
         parent::__construct($name);

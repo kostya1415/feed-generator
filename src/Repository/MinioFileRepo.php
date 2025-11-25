@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Repo;
+namespace App\Repository;
 
 use App\Enum\Compression;
 use App\Enum\FeedName;
-use App\Repo\Contract\S3RepoInterface;
-use App\UseCase\Stream\Stream;
+use App\Repository\Contract\FileRepoInterface;
+use App\Stream\Stream;
 use Aws\Result;
 use Aws\S3\S3Client;
 
-class MinioS3Repo implements S3RepoInterface
+class MinioFileRepo implements FileRepoInterface
 {
     /**
      * @param S3Client $client
@@ -17,9 +17,9 @@ class MinioS3Repo implements S3RepoInterface
      * @param string $basketName
      */
     public function __construct(
-        private S3Client $client,
-        private bool     $isBucketPolicySupported,
-        private string   $basketName
+        private readonly S3Client $client,
+        private readonly bool     $isBucketPolicySupported,
+        private readonly string   $basketName
     )
     {
     }
@@ -27,7 +27,16 @@ class MinioS3Repo implements S3RepoInterface
     /**
      * @return void
      */
-    public function createBucket(): void
+    public function prepare(): void
+    {
+        $this->registerStreamWrapper();
+        $this->createBucket();
+    }
+
+    /**
+     * @return void
+     */
+    private function createBucket(): void
     {
         if (!$this->client->doesBucketExist($this->basketName)) {
             $this->client->createBucket([
@@ -51,7 +60,7 @@ class MinioS3Repo implements S3RepoInterface
     /**
      * @return void
      */
-    public function registerStreamWrapper(): void
+    private function registerStreamWrapper(): void
     {
         $this->client->registerStreamWrapper();
     }

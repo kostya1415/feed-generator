@@ -1,10 +1,10 @@
 <?php
 
-namespace App\UseCase\Action;
+namespace App\Action;
 
 use App\Enum\Compression;
 use App\Enum\FeedName;
-use App\Repo\Contract\S3RepoInterface;
+use App\Repository\Contract\FileRepoInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,13 +17,13 @@ class GetFeedResponseAction
 {
     /**
      * @param RequestStack $requestStack
-     * @param S3RepoInterface $s3Repo
+     * @param FileRepoInterface $fileRepo
      * @param LoggerInterface $logger
      */
     public function __construct(
-        private RequestStack    $requestStack,
-        private S3RepoInterface $s3Repo,
-        private LoggerInterface $logger
+        private readonly RequestStack      $requestStack,
+        private readonly FileRepoInterface $fileRepo,
+        private readonly LoggerInterface   $logger
     )
     {
     }
@@ -35,7 +35,7 @@ class GetFeedResponseAction
      */
     public function run(FeedName $feedName, ?Compression $compress = null): StreamedResponse|Response
     {
-        $this->s3Repo->registerStreamWrapper();
+        $this->fileRepo->prepare();
 
         $response = $this->getStreamedResponse($feedName, $compress);
 
@@ -78,7 +78,7 @@ class GetFeedResponseAction
     {
         return new StreamedResponse(function () use ($feedName, $compress) {
             try {
-                $stream = $this->s3Repo->openPublicFeedRead($feedName, $compress);
+                $stream = $this->fileRepo->openPublicFeedRead($feedName, $compress);
             } catch (Throwable $e) {
                 $this->logger->error('Download feed exception: ' . $e->getMessage());
                 throw new NotFoundHttpException('FeedName not found');
@@ -103,7 +103,7 @@ class GetFeedResponseAction
     private function getFeedETag(FeedName $feedName): ?string
     {
         try {
-            $headers = $this->s3Repo->getPublicFeedHeaders($feedName);
+            $headers = $this->fileRepo->getPublicFeedHeaders($feedName);
         } catch (Throwable $e) {
             $this->logger->error('Can\'t get ' . $feedName->value . ' feed headers: ' . $e->getMessage());
             return null;

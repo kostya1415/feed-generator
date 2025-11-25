@@ -1,10 +1,8 @@
 <?php
 
-namespace App\UseCase\Render;
+namespace App\Render;
 
-use App\Enum\FeedName;
-use App\UseCase\Render\Contract\RenderInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
+use App\Render\Contract\RenderInterface;
 use Twig\Environment;
 use Twig\TemplateWrapper;
 

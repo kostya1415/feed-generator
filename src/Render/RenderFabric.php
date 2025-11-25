@@ -1,10 +1,10 @@
 <?php
 
-namespace App\UseCase\Render;
+namespace App\Render;
 
 use App\Enum\FeedName;
-use App\Repo\Contract\OffersRepoInterface;
-use App\UseCase\Render\Contract\RenderInterface;
+use App\Render\Contract\RenderInterface;
+use App\Repository\Contract\OffersRepoInterface;
 use Exception;
 use Twig\Environment;
 
@@ -22,6 +22,7 @@ class RenderFabric
      * @param OffersRepoInterface $offersRepo
      * @param string $siteUrl
      * @return RenderInterface
+     * @throws Exception
      */
     public static function getRender(
         FeedName            $feedName,

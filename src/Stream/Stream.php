@@ -1,6 +1,6 @@
 <?php
 
-namespace App\UseCase\Stream;
+namespace App\Stream;
 
 use Exception;
 
@@ -8,8 +8,11 @@ class Stream
 {
     /**
      * @param resource $stream
+     * @throws Exception
      */
-    public function __construct(private mixed $stream, private bool $isTmp)
+    public function __construct(
+        private readonly mixed $stream,
+        private readonly bool  $isTmp)
     {
         if (!is_resource($stream)) {
             throw new Exception('Invalid stream received in constructor');
@@ -20,6 +23,7 @@ class Stream
      * @param string $path
      * @param string $mode
      * @return self
+     * @throws Exception
      */
     public static function fromPath(string $path, string $mode): self
     {
@@ -29,6 +33,7 @@ class Stream
 
     /**
      * @return self
+     * @throws Exception
      */
     public static function tmp(): self
     {
@@ -38,6 +43,7 @@ class Stream
     /**
      * @param string $content
      * @return void
+     * @throws Exception
      */
     public function write(string $content): void
     {
@@ -53,6 +59,7 @@ class Stream
     /**
      * @param int $offset
      * @return void
+     * @throws Exception
      */
     public function resetPointer(int $offset = 0): void
     {
@@ -65,6 +72,7 @@ class Stream
 
     /**
      * @return string
+     * @throws Exception
      */
     public function getFilePath(): string
     {
@@ -84,6 +92,7 @@ class Stream
 
     /**
      * @return bool
+     * @throws Exception
      */
     public function isEnd(): bool
     {
@@ -97,6 +106,7 @@ class Stream
     /**
      * @param int $length
      * @return string
+     * @throws Exception
      */
     public function read(int $length = 1024): string
     {
@@ -119,6 +129,7 @@ class Stream
 
     /**
      * @return void
+     * @throws Exception
      */
     public function delete(): void
     {

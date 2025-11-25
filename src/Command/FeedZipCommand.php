@@ -2,7 +2,7 @@
 
 namespace App\Command;
 
-use App\UseCase\Action\FeedZipAction;
+use App\Action\FeedZipAction;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,9 +23,9 @@ class FeedZipCommand extends Command
      * @param string|null $name
      */
     public function __construct(
-        private FeedZipAction $feedZip,
-        private LockFactory   $lockFactory,
-        string                $name = null
+        private readonly FeedZipAction $feedZip,
+        private readonly LockFactory   $lockFactory,
+        string                         $name = null
     )
     {
         parent::__construct($name);

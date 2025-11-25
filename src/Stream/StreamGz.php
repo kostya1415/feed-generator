@@ -1,6 +1,6 @@
 <?php
 
-namespace App\UseCase\Stream;
+namespace App\Stream;
 
 use Exception;
 
@@ -8,8 +8,12 @@ class StreamGz
 {
     /**
      * @param resource $stream
+     * @throws Exception
      */
-    public function __construct(protected mixed $stream, protected bool $isTmp)
+    public function __construct(
+        protected mixed $stream,
+        protected bool  $isTmp
+    )
     {
         if (!is_resource($stream)) {
             throw new Exception('Invalid stream gz received in constructor');
@@ -20,6 +24,7 @@ class StreamGz
      * @param string $path
      * @param string $mode
      * @return self
+     * @throws Exception
      */
     public static function fromPath(string $path, string $mode): self
     {
@@ -30,6 +35,7 @@ class StreamGz
     /**
      * @param string $content
      * @return void
+     * @throws Exception
      */
     public function write(string $content): void
     {

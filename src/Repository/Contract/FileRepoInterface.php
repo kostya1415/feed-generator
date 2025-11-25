@@ -1,23 +1,18 @@
 <?php
 
-namespace App\Repo\Contract;
+namespace App\Repository\Contract;
 
 use App\Enum\Compression;
 use App\Enum\FeedName;
-use App\UseCase\Stream\Stream;
+use App\Stream\Stream;
 use Aws\Result;
 
-interface S3RepoInterface
+interface FileRepoInterface
 {
     /**
      * @return void
      */
-    public function createBucket(): void;
-
-    /**
-     * @return void
-     */
-    public function registerStreamWrapper(): void;
+    public function prepare(): void;
 
     /**
      * @param FeedName $feedName

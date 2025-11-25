@@ -1,12 +1,13 @@
 <?php
 
-namespace App\UseCase\Action;
+namespace App\Action;
 
 use App\Enum\Compression;
 use App\Enum\FeedName;
-use App\Repo\Contract\S3RepoInterface;
-use App\UseCase\Stream\Stream;
-use App\UseCase\Stream\StreamGz;
+use App\Repository\Contract\FileRepoInterface;
+use App\Stream\Stream;
+use App\Stream\StreamGz;
+use Exception;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class FeedGzipAction
@@ -17,12 +18,12 @@ class FeedGzipAction
     private array $feedNames = [];
 
     /**
-     * @param S3RepoInterface $s3Repo
+     * @param FileRepoInterface $fileRepo
      * @param array<string> $feedNamesStr
      */
     public function __construct(
-        private S3RepoInterface $s3Repo,
-        array                   $feedNamesStr
+        private readonly FileRepoInterface $fileRepo,
+        array                              $feedNamesStr
     )
     {
         foreach ($feedNamesStr as $feedNameStr) {
@@ -36,7 +37,7 @@ class FeedGzipAction
      */
     public function run(SymfonyStyle $io): void
     {
-        $this->s3Repo->registerStreamWrapper();
+        $this->fileRepo->prepare();
 
         foreach ($this->feedNames as $feedName) {
             $this->createGzipCopy($io, $feedName);
@@ -56,13 +57,13 @@ class FeedGzipAction
 
         $io->info('Downloading ' . $feedName->value . ' feed as gzip...');
 
-        $this->downloadFromS3AsGzip($feedName);
+        $this->downloadAsGzip($feedName);
 
         $io->info('Success');
 
         $io->info('Uploading compressed ' . $feedName->value . ' feed...');
 
-        $this->uploadGzipToS3($feedName);
+        $this->uploadGzip($feedName);
 
         $io->info('Success');
 
@@ -79,7 +80,7 @@ class FeedGzipAction
      */
     private function deleteTmpFeeds(FeedName $feedName): void
     {
-        $this->s3Repo->deleteTmpFeed($feedName, Compression::Gzip);
+        $this->fileRepo->deleteTmpFeed($feedName, Compression::Gzip);
 
         if (file_exists($localTmpFeed = $this->getTmpGzipPath($feedName))) {
             unlink($localTmpFeed);
@@ -89,35 +90,37 @@ class FeedGzipAction
     /**
      * @param FeedName $feedName
      * @return void
+     * @throws Exception
      */
-    private function downloadFromS3AsGzip(FeedName $feedName): void
+    private function downloadAsGzip(FeedName $feedName): void
     {
-        $streamS3 = $this->s3Repo->openPublicFeedRead($feedName);
+        $streamRemote = $this->fileRepo->openPublicFeedRead($feedName);
         $streamLocalGzip = StreamGz::fromPath($this->getTmpGzipPath($feedName), 'w');
 
-        while (!$streamS3->isEnd()) {
-            $streamLocalGzip->write($streamS3->read());
+        while (!$streamRemote->isEnd()) {
+            $streamLocalGzip->write($streamRemote->read());
         }
 
-        $streamS3->close();
+        $streamRemote->close();
         $streamLocalGzip->close();
     }
 
     /**
      * @param FeedName $feedName
      * @return void
+     * @throws Exception
      */
-    private function uploadGzipToS3(FeedName $feedName): void
+    private function uploadGzip(FeedName $feedName): void
     {
         $streamLocalGzip = Stream::fromPath($this->getTmpGzipPath($feedName), 'r');
-        $streamS3Gzip = $this->s3Repo->openTmpFeedWrite($feedName, Compression::Gzip);
+        $streamRemoteGzip = $this->fileRepo->openTmpFeedWrite($feedName, Compression::Gzip);
 
         while (!$streamLocalGzip->isEnd()) {
-            $streamS3Gzip->write($streamLocalGzip->read());
+            $streamRemoteGzip->write($streamLocalGzip->read());
         }
 
         $streamLocalGzip->delete();
-        $streamS3Gzip->close();
+        $streamRemoteGzip->close();
     }
 
     /**
@@ -126,9 +129,9 @@ class FeedGzipAction
      */
     private function replaceFeed(FeedName $feedName): void
     {
-        $this->s3Repo->deletePublicFeed($feedName, Compression::Gzip);
-        $this->s3Repo->publishTmpFeed($feedName, Compression::Gzip);
-        $this->s3Repo->deleteTmpFeed($feedName, Compression::Gzip);
+        $this->fileRepo->deletePublicFeed($feedName, Compression::Gzip);
+        $this->fileRepo->publishTmpFeed($feedName, Compression::Gzip);
+        $this->fileRepo->deleteTmpFeed($feedName, Compression::Gzip);
     }
 
     /**

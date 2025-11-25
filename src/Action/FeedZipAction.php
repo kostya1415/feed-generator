@@ -1,11 +1,11 @@
 <?php
 
-namespace App\UseCase\Action;
+namespace App\Action;
 
 use App\Enum\Compression;
 use App\Enum\FeedName;
-use App\Repo\Contract\S3RepoInterface;
-use App\UseCase\Stream\Stream;
+use App\Repository\Contract\FileRepoInterface;
+use App\Stream\Stream;
 use Exception;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
@@ -19,12 +19,12 @@ class FeedZipAction
     private array $feedNames = [];
 
     /**
-     * @param S3RepoInterface $s3Repo
+     * @param FileRepoInterface $fileRepo
      * @param array<string> $feedNamesStr
      */
     public function __construct(
-        private S3RepoInterface $s3Repo,
-        array                   $feedNamesStr
+        private readonly FileRepoInterface $fileRepo,
+        array                              $feedNamesStr
     )
     {
         foreach ($feedNamesStr as $feedNameStr) {
@@ -35,10 +35,11 @@ class FeedZipAction
     /**
      * @param SymfonyStyle $io
      * @return void
+     * @throws Throwable
      */
     public function run(SymfonyStyle $io): void
     {
-        $this->s3Repo->registerStreamWrapper();
+        $this->fileRepo->prepare();
 
         foreach ($this->feedNames as $feedName) {
             $this->createZipCopy($io, $feedName);
@@ -49,12 +50,13 @@ class FeedZipAction
      * @param SymfonyStyle $io
      * @param FeedName $feedName
      * @return void
+     * @throws Throwable
      */
-    private function createZipCopy(SymfonyStyle $io, FeedName $feedName)
+    private function createZipCopy(SymfonyStyle $io, FeedName $feedName): void
     {
         $io->info('Deleting temporary feed ' . $feedName->value . ' if it still exists');
 
-        $this->s3Repo->deleteTmpFeed($feedName, Compression::Zip);
+        $this->fileRepo->deleteTmpFeed($feedName, Compression::Zip);
 
         $io->info('Downloading ' . $feedName->value . ' feed...');
 
@@ -95,18 +97,19 @@ class FeedZipAction
     /**
      * @param FeedName $feedName
      * @return Stream
+     * @throws Exception
      */
     private function downloadFeed(FeedName $feedName): Stream
     {
-        $streamS3 = $this->s3Repo->openPublicFeedRead($feedName);
+        $streamRemote = $this->fileRepo->openPublicFeedRead($feedName);
 
         $streamTmpLocal = Stream::tmp();
 
-        while (!$streamS3->isEnd()) {
-            $streamTmpLocal->write($streamS3->read());
+        while (!$streamRemote->isEnd()) {
+            $streamTmpLocal->write($streamRemote->read());
         }
 
-        $streamS3->close();
+        $streamRemote->close();
 
         $streamTmpLocal->resetPointer();
 
@@ -117,6 +120,7 @@ class FeedZipAction
      * @param FeedName $feedName
      * @param Stream $streamTmpLocal
      * @return Stream
+     * @throws Exception
      */
     private function zipFeedTmp(FeedName $feedName, Stream $streamTmpLocal): Stream
     {
@@ -146,16 +150,17 @@ class FeedZipAction
      * @param FeedName $feedName
      * @param Stream $streamTmpLocalZip
      * @return void
+     * @throws Exception
      */
     private function uploadZipFeedTmp(FeedName $feedName, Stream $streamTmpLocalZip): void
     {
-        $streamS3Zip = $this->s3Repo->openTmpFeedWrite($feedName, Compression::Zip);
+        $streamRemoteZip = $this->fileRepo->openTmpFeedWrite($feedName, Compression::Zip);
 
         while (!$streamTmpLocalZip->isEnd()) {
-            $streamS3Zip->write($streamTmpLocalZip->read());
+            $streamRemoteZip->write($streamTmpLocalZip->read());
         }
 
-        $streamS3Zip->close();
+        $streamRemoteZip->close();
     }
 
     /**
@@ -164,8 +169,8 @@ class FeedZipAction
      */
     private function replaceFeed(FeedName $feedName): void
     {
-        $this->s3Repo->deletePublicFeed($feedName, Compression::Zip);
-        $this->s3Repo->publishTmpFeed($feedName, Compression::Zip);
-        $this->s3Repo->deleteTmpFeed($feedName, Compression::Zip);
+        $this->fileRepo->deletePublicFeed($feedName, Compression::Zip);
+        $this->fileRepo->publishTmpFeed($feedName, Compression::Zip);
+        $this->fileRepo->deleteTmpFeed($feedName, Compression::Zip);
     }
 }

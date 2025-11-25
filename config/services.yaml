@@ -15,9 +15,9 @@ services:
       - '../src/Entity/'
       - '../src/Kernel.php'
 
-  App\Repo\Contract\OffersRepoInterface: '@App\Repo\HttpOffersRepo'
+  App\Repository\Contract\OffersRepoInterface: '@App\Repository\HttpOffersRepo'
 
-  App\Repo\Contract\S3RepoInterface: '@App\Repo\MinioS3Repo'
+  App\Repository\Contract\FileRepoInterface: '@App\Repository\MinioFileRepo'
 
   Aws\S3\S3Client:
     arguments:
@@ -26,36 +26,36 @@ services:
         endpoint: '%env(MINIO_SERVER)%'
         use_path_style_endpoint: true
         credentials:
-          key: '%env(CEPH_ACCESS_KEY)%'
-          secret: '%env(CEPH_SECRET_KEY)%'
+          key: '%env(MINIO_ACCESS_KEY)%'
+          secret: '%env(MINIO_SECRET_KEY)%'
 
-  App\Repo\MinioS3Repo:
+  App\Repository\MinioFileRepo:
     arguments:
       $isBucketPolicySupported: '%env(bool:S3_IS_BUCKET_POLICY_SUPPORTED)%'
-      $basketName: '%env(BASKET_NAME)%'
+      $basketName: '%env(S3_BASKET_NAME)%'
 
-  App\UseCase\Action\FeedGzipAction:
+  App\Action\FeedGzipAction:
     arguments:
       $feedNamesStr:
         - 'example'
         # todo
 
-  App\UseCase\Action\FeedZipAction:
+  App\Action\FeedZipAction:
     arguments:
       $feedNamesStr:
         - 'example2'
         # todo
 
-  App\UseCase\Render\ExampleRender:
+  App\Render\ExampleRender:
     arguments:
       $siteUrl:
         '%env(SITE_URL)%'
-  App\UseCase\Render\Example2Render:
+  App\Render\Example2Render:
     arguments:
       $siteUrl:
         '%env(SITE_URL)%'
 
-  App\UseCase\Action\MakeFeedAction:
+  App\Action\MakeFeedAction:
     arguments:
       $siteUrl: '%env(SITE_URL)%'
       $offerLimit: '%env(int:OFFERS_PER_PAGE_LIMIT)%'

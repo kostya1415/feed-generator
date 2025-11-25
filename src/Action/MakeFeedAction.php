@@ -1,13 +1,13 @@
 <?php
 
-namespace App\UseCase\Action;
+namespace App\Action;
 
+use App\DTO\FeedRenderData;
 use App\Enum\FeedName;
-use App\Repo\Contract\OffersRepoInterface;
-use App\Repo\Contract\S3RepoInterface;
-use App\UseCase\DTO\FeedRenderData;
-use App\UseCase\Render\Contract\RenderInterface;
-use App\UseCase\Render\RenderFabric;
+use App\Render\Contract\RenderInterface;
+use App\Render\RenderFabric;
+use App\Repository\Contract\OffersRepoInterface;
+use App\Repository\Contract\FileRepoInterface;
 use Exception;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Throwable;
@@ -25,18 +25,18 @@ class MakeFeedAction
      * @param Environment $twig
      * @param FeedZipAction $feedZip
      * @param FeedGzipAction $feedGzip
-     * @param S3RepoInterface $s3Repo
+     * @param FileRepoInterface $fileRepo
      * @param int $offerLimit
      * @param string $siteUrl
      */
     public function __construct(
-        private OffersRepoInterface $offersRepo,
-        private Environment         $twig,
-        private FeedZipAction       $feedZip,
-        private FeedGzipAction      $feedGzip,
-        private S3RepoInterface     $s3Repo,
-        private int                 $offerLimit,
-        private string              $siteUrl,
+        private readonly OffersRepoInterface $offersRepo,
+        private readonly Environment         $twig,
+        private readonly FeedZipAction       $feedZip,
+        private readonly FeedGzipAction      $feedGzip,
+        private readonly FileRepoInterface   $fileRepo,
+        private readonly int                 $offerLimit,
+        private readonly string              $siteUrl,
     )
     {
     }
@@ -44,17 +44,14 @@ class MakeFeedAction
     /**
      * @param SymfonyStyle $io
      * @return void
+     * @throws Exception
      */
     public function run(SymfonyStyle $io): void
     {
         try {
-            $io->info('Register stream wrapper...');
+            $io->info('Prepare file storage...');
 
-            $this->s3Repo->registerStreamWrapper();
-
-            $io->info('Successfully. Now let’s try to create a basket if it has disappeared somewhere...');
-
-            $this->s3Repo->createBucket();
+            $this->fileRepo->prepare();
 
             $io->info('Successfully. Now let’s try to delete temporary feeds, if they exists...');
 
@@ -126,13 +123,14 @@ class MakeFeedAction
     private function addFeedData(RenderInterface $render): void
     {
         $this->feedsData[] = new FeedRenderData(
-            stream: $this->s3Repo->openTmpFeedWrite($render::getFeedName()),
+            stream: $this->fileRepo->openTmpFeedWrite($render::getFeedName()),
             render: $render
         );
     }
 
     /**
      * @return array<FeedRenderData>
+     * @throws Exception
      */
     private function getFeedData(): array
     {
@@ -149,13 +147,14 @@ class MakeFeedAction
     private function deleteTmpFeeds(): void
     {
         foreach (FeedName::cases() as $feedName) {
-            $this->s3Repo->deleteTmpFeed($feedName);
+            $this->fileRepo->deleteTmpFeed($feedName);
         }
     }
 
     /**
      * @param SymfonyStyle $io
      * @return void
+     * @throws Exception
      */
     private function uploadHeaders(SymfonyStyle $io): void
     {
@@ -167,6 +166,7 @@ class MakeFeedAction
     /**
      * @param SymfonyStyle $io
      * @return void
+     * @throws Exception
      */
     private function uploadCategories(SymfonyStyle $io): void
     {
@@ -202,6 +202,7 @@ class MakeFeedAction
     /**
      * @param SymfonyStyle $io
      * @return void
+     * @throws Exception
      */
     private function uploadOffers(SymfonyStyle $io): void
     {
@@ -245,6 +246,7 @@ class MakeFeedAction
 
     /**
      * @return void
+     * @throws Exception
      */
     private function uploadFooter(): void
     {
@@ -257,6 +259,7 @@ class MakeFeedAction
 
     /**
      * @return void
+     * @throws Exception
      */
     private function closeStreams(): void
     {
@@ -267,13 +270,14 @@ class MakeFeedAction
 
     /**
      * @return void
+     * @throws Exception
      */
     private function replaceFeeds(): void
     {
         foreach ($this->getFeedData() as $feedData) {
-            $this->s3Repo->deletePublicFeed($feedData->getRender()::getFeedName());
-            $this->s3Repo->publishTmpFeed($feedData->getRender()::getFeedName());
-            $this->s3Repo->deleteTmpFeed($feedData->getRender()::getFeedName());
+            $this->fileRepo->deletePublicFeed($feedData->getRender()::getFeedName());
+            $this->fileRepo->publishTmpFeed($feedData->getRender()::getFeedName());
+            $this->fileRepo->deleteTmpFeed($feedData->getRender()::getFeedName());
         }
     }
 }

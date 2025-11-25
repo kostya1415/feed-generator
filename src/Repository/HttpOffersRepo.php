@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repo;
+namespace App\Repository;
 
-use App\Repo\Contract\OffersRepoInterface;
+use App\Repository\Contract\OffersRepoInterface;
 
 class HttpOffersRepo implements OffersRepoInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\UseCase\Render\Contract;
+namespace App\Render\Contract;
 
 use App\Enum\FeedName;
 use Symfony\Component\Console\Style\SymfonyStyle;

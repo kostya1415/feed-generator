@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repo\Contract;
+namespace App\Repository\Contract;
 
 interface OffersRepoInterface
 {

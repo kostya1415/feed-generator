@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
+use App\Action\GetFeedResponseAction;
 use App\Enum\Compression;
 use App\Enum\FeedName;
-use App\UseCase\Action\GetFeedResponseAction;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -15,7 +15,7 @@ class FeedController extends AbstractController
     /**
      * @param GetFeedResponseAction $getFeedResponse
      */
-    public function __construct(private GetFeedResponseAction $getFeedResponse)
+    public function __construct(private readonly GetFeedResponseAction $getFeedResponse)
     {
     }
 
