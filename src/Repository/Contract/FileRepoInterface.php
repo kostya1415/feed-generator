@@ -5,7 +5,6 @@ namespace App\Repository\Contract;
 use App\Enum\Compression;
 use App\Enum\FeedName;
 use App\Stream\Stream;
-use Aws\Result;
 
 interface FileRepoInterface
 {
@@ -31,28 +30,28 @@ interface FileRepoInterface
     /**
      * @param FeedName $feedName
      * @param Compression|null $compress
-     * @return Result
+     * @return void
      */
-    public function deleteTmpFeed(FeedName $feedName, ?Compression $compress = null): Result;
+    public function deleteTmpFeed(FeedName $feedName, ?Compression $compress = null): void;
 
     /**
      * @param FeedName $feedName
      * @param Compression|null $compress
-     * @return Result
+     * @return void
      */
-    public function deletePublicFeed(FeedName $feedName, ?Compression $compress = null): Result;
+    public function deletePublicFeed(FeedName $feedName, ?Compression $compress = null): void;
 
     /**
      * @param FeedName $feedName
      * @param Compression|null $compress
-     * @return Result
+     * @return void
      */
-    public function publishTmpFeed(FeedName $feedName, ?Compression $compress = null): Result;
+    public function publishTmpFeed(FeedName $feedName, ?Compression $compress = null): void;
 
     /**
      * @param FeedName $feedName
      * @param Compression|null $compress
-     * @return Result
+     * @return string
      */
-    public function getPublicFeedHeaders(FeedName $feedName, ?Compression $compress = null): Result;
+    public function getETag(FeedName $feedName, ?Compression $compress = null): string;
 }

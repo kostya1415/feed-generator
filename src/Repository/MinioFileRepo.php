@@ -6,8 +6,8 @@ use App\Enum\Compression;
 use App\Enum\FeedName;
 use App\Repository\Contract\FileRepoInterface;
 use App\Stream\Stream;
-use Aws\Result;
 use Aws\S3\S3Client;
+use Exception;
 
 class MinioFileRepo implements FileRepoInterface
 {
@@ -69,6 +69,7 @@ class MinioFileRepo implements FileRepoInterface
      * @param FeedName $feedName
      * @param Compression|null $compress
      * @return Stream
+     * @throws Exception
      */
     public function openTmpFeedWrite(FeedName $feedName, ?Compression $compress = null): Stream
     {
@@ -79,6 +80,7 @@ class MinioFileRepo implements FileRepoInterface
      * @param FeedName $feedName
      * @param Compression|null $compress
      * @return Stream
+     * @throws Exception
      */
     public function openPublicFeedRead(FeedName $feedName, ?Compression $compress = null): Stream
     {
@@ -88,11 +90,11 @@ class MinioFileRepo implements FileRepoInterface
     /**
      * @param FeedName $feedName
      * @param Compression|null $compress
-     * @return Result
+     * @return void
      */
-    public function deleteTmpFeed(FeedName $feedName, ?Compression $compress = null): Result
+    public function deleteTmpFeed(FeedName $feedName, ?Compression $compress = null): void
     {
-        return $this->client->deleteObject([
+        $this->client->deleteObject([
             'Bucket' => $this->basketName,
             'Key' => $this->getTmpFeedKey($feedName, $compress),
         ]);
@@ -101,11 +103,11 @@ class MinioFileRepo implements FileRepoInterface
     /**
      * @param FeedName $feedName
      * @param Compression|null $compress
-     * @return Result
+     * @return void
      */
-    public function deletePublicFeed(FeedName $feedName, ?Compression $compress = null): Result
+    public function deletePublicFeed(FeedName $feedName, ?Compression $compress = null): void
     {
-        return $this->client->deleteObject([
+        $this->client->deleteObject([
             'Bucket' => $this->basketName,
             'Key' => $this->getPublicFeedKey($feedName, $compress),
         ]);
@@ -114,11 +116,11 @@ class MinioFileRepo implements FileRepoInterface
     /**
      * @param FeedName $feedName
      * @param Compression|null $compress
-     * @return Result
+     * @return void
      */
-    public function publishTmpFeed(FeedName $feedName, ?Compression $compress = null): Result
+    public function publishTmpFeed(FeedName $feedName, ?Compression $compress = null): void
     {
-        return $this->client->copyObject([
+        $this->client->copyObject([
             'Bucket' => $this->basketName,
             'Key' => $this->getPublicFeedKey($feedName, $compress),
             'CopySource' => $this->basketName . '/' . $this->getTmpFeedKey($feedName, $compress),
@@ -128,14 +130,23 @@ class MinioFileRepo implements FileRepoInterface
     /**
      * @param FeedName $feedName
      * @param Compression|null $compress
-     * @return Result
+     * @return string
      */
-    public function getPublicFeedHeaders(FeedName $feedName, ?Compression $compress = null): Result
+    public function getETag(FeedName $feedName, ?Compression $compress = null): string
     {
-        return $this->client->headObject([
+        $headers = $this->client->headObject([
             'Bucket' => $this->basketName,
             'Key' => $this->getPublicFeedKey($feedName, $compress),
         ]);
+
+        $headers = $headers->toArray();
+        foreach ($headers as $key => $value) {
+            if ($key === 'ETag' && is_string($value ?: null)) {
+                return $value;
+            }
+        }
+
+        return '';
     }
 
     /**

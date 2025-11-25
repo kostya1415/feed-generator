@@ -48,7 +48,7 @@ class GetFeedResponseAction
             'feed.yml' . ($compress ? ('.' . $compress->value) : '')
         ));
 
-        if ($etag = $this->getFeedETag($feedName)) {
+        if ($etag =$this->getFeedETag($feedName)) {
             $response->headers->set('ETag', $etag);
             $response->isNotModified($this->requestStack->getCurrentRequest());
         }
@@ -98,26 +98,22 @@ class GetFeedResponseAction
 
     /**
      * @param FeedName $feedName
-     * @return string|null
+     * @return string
      */
-    private function getFeedETag(FeedName $feedName): ?string
+    private function getFeedETag(FeedName $feedName): string
     {
         try {
-            $headers = $this->fileRepo->getPublicFeedHeaders($feedName);
+            $etag =$this->fileRepo->getETag($feedName);
         } catch (Throwable $e) {
             $this->logger->error('Can\'t get ' . $feedName->value . ' feed headers: ' . $e->getMessage());
-            return null;
+            return '';
         }
 
-        $headers = $headers->toArray();
-        foreach ($headers as $key => $value) {
-            if ($key === 'ETag' && is_string($value ?: null)) {
-                return $value;
-            }
+        if ($etag) {
+            return $etag;
         }
 
-        $this->logger->error('ETag not found in ' . $feedName->value . ': ' . json_encode($headers));
-
-        return null;
+        $this->logger->error('ETag not found in ' . $feedName->value);
+        return '';
     }
 }
