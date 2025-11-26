@@ -29,18 +29,16 @@ services:
 
   redis:
     hostname: redis
-    image: redis:alpine
+    image: redis:8.4
     ports:
       - "6381:${REDIS_PORT}"
-    volumes:
-      - ./docker/redis:/var/lib/redis
     environment:
       - REDIS_REPLICATION_MODE=master
     networks:
       - feed-generator
 
   minio:
-    image: minio/minio
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     restart: unless-stopped
     ports:
       - '9090:9000'
